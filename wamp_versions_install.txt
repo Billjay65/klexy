@@ -1,0 +1,234 @@
+/*** Wamp App versions to install from Toshiba ***/
+// Intall apps from $Desktop\klexy\Compressed
+// Copy and save all settings here in klexy. Use settings from klexy only
+// Upgrade mysql to version 8.0.36 64 bit 
+=> Apache2.4.2 (win32)
+// How to install apache
+1) Download the installation media in the form of a ZIP file
+2) Extract the contents of the Apache Web Server 2.4 zip to the file system
+3) Locate the extracted Apache24 folder and copy this folder to the root of C:\
+4) Open the C:\Apache24\bin folder and run the httpd.exe command  [ERROR: does not work] 
+   Use command prompt instead as administrator.
+
+  You must uninstall Apache:
+sc delete "[name service]"
+
+sc delete "Apache2.4"
+
+Restart pc
+
+cmd how administrator
+
+cd \apache24\bin
+
+httpd -k install  [WP]
+
+5) View the Apache HTTP Server landing page at http://localhost:80 to verify the Windows install
+6) Double click on C:\Apache24\bin\ApacheMonitor.exe   - to install the monitor
+
+
+=> php 8.0.21 
+  // https://php.tutorials24x7.com/blog/how-to-install-php-8-on-windows
+- After installing, install Visual Studio C++ (VC_redist.x86) to solve errors
+- C:\Users\USER>php -v      [WP]
+  php 8.0.21 (cli) ...
+- Configure php with Apache 
+  *Add following code to httpd.conf
+  # PHP 8.0
+  PHPIniDir "c:/php"
+  LoadModule php_module "c:/php/php8apache2_4.dll"
+  *Add the following to mime.types
+  application/x-httpd-php             php
+- Copy and save php.ini-development as php.ini
+  NXT> Modify php.ini file add settings to load extensions etc
+       base on php.ini of Toshiba laptop settings. [Done Test Later]
+  NXT> Create calculteller, campb and workzone apache alias and test [WP]
+  KEY> First create calculteller database and carefull take note and copy all upgrades and
+       changes required to run on mysql8. Then apply to other databases.
+  NXT> Create calculteller, campb, workzone, humanr, humanrw databases and 
+       test all the applications. 
+	   => /*** calculteller ***/
+	   - ERROR: Occurred when trying to recreate database from calculteller.sql dump file
+	     Error 1046 (3D000) at line 22: No database selected
+	   - SOLUTION: 
+	   * Created database in mysql shell using:
+	     > CREATE DATABASE IF NOT EXISTS calculteller;
+	   * Added the following to mysql5 backup file 
+	     --
+         -- MyVersion: Specify database to use to avoid error
+         -- Error 1064 (3D000) at line 22: No database selected
+         --
+         USE calculteller;
+	   * Created the new database from command prompt using the following command [WP]
+	     C:\Users\USER\Desktop\klexy\mysql_dbs_bkup\calculteller>mysql -u root -p<calculteller.sql
+		 Enter password: Sikehjaphetberyuf12
+	   * Changed mysql user in config to root mysql use
+	     To see all MySQL users use:
+		 SELECT user FROM mysql.user; 
+		 ...
+		 define('DB_USERNAME', 'root');   [WP] Database queries work but css is gone H/W?
+	   - Update links in LINK class file and modify links.
+	     Define HTTP port to empty string ''
+	     // Server HTTP port (can omit if the default 80 is used)
+         define('HTTP_SERVER_PORT', '');   [WP]
+	   - Images are not being displayed properly? Fix next
+	     Change image links to .jpg instead of .png etc
+	   - Modify mobile responsive design grid styles : Copy from hosted version of ct
+	   - Reduce size of scroll bars and hide when necessary
+	   =>/*** campb ***/
+	   - ERROR: Warning: require_once(C:\Users\JAY.V\Desktop\campbroot\include\config.php): Failed to
+	    open stream: No such file or directory in C:\Users\USER\Desktop\klexy\campbroot\campb\index.php on line 9
+
+        Fatal error: Uncaught Error: Failed opening required 
+	    'C:\Users\JAY.V\Desktop\campbroot\include\config.php' (include_path='.;C:\php\pear') in 
+	    C:\Users\USER\Desktop\klexy\campbroot\campb\index.php:9 Stack trace: #0 {main} thrown in
+	    C:\Users\USER\Desktop\klexy\campbroot\campb\index.php on line 9
+	   - SOLUTION: 
+	    Change site root path in campbroot\include\config.php 
+	    // SITE ROOT contains the full path to the campb folder
+        // In production server replace with path to hosting account
+        define('SITE_ROOT', 'C:\\Users\\JAY.V\\Desktop\\campbroot\\campb');
+	   
+	    Modify campb/index.php to include correct path to config
+	    // Include constants and utility files
+        require_once 'C:\Users\USER\Desktop\klexy\campbroot\include\config.php';
+	   - ERROR: ERRNO: 256
+         TEXT: SQLSTATE[HY000] [1045] Access denied for user 'jay.v'@'localhost' 
+		 (using password: YES)
+         LOCATION: C:\Users\USER\Desktop\klexy\campbroot\campb\business\database_handler.php, 
+		 line 35, at February 8, 2024, 10:01 am
+         Showing backtrace:
+	   - SOLUTION:
+	   * Change user of mysql database to root in campbroot/include/config
+	     ...
+	     define('DB_USERNAME', 'root');
+	   - ERROR: 
+	     ERRNO: 256
+         TEXT: SQLSTATE[HY000] [1049] Unknown database 'campb'
+         LOCATION: C:\Users\USER\Desktop\klexy\campbroot\campb\business\database_handler.php, 
+		 line 35, at February 8, 2024, 10:07 am
+         Showing backtrace:
+	   - SOLUTION: 
+	   * Created database in mysql shell using:
+	     > CREATE DATABASE IF NOT EXISTS campb;
+	   * Added the following to mysql5 backup campb file in
+	     C:\Users\USER\Desktop\klexy\mysql_dbs_bkup\campb\campb.sql
+	     --
+         -- MyVersion: Specify database to use to avoid error
+         -- Error 1064 (3D000) at line 22: No database selected
+         --
+         USE campb;
+	   * Backed up campb from Toshiba machine including stored procedures as follows
+	     C:\Users\JAY.V\...\campb>mysqldump -u root -p --routines campb>campb.sql
+         Enter Password: SJb12
+	   * Created the new database from command prompt using the following command [WP]
+	     C:\Users\USER\Desktop\klexy\mysql_dbs_bkup\campb>mysql -u root -p<campb.sql
+		 - ERROR 1231 (42000) at line 515: Variable 'sql_mode' can't be set to the values of
+		   'NO_AUTO_CREATE_USER'
+		 - SOLUTION: 
+		 After doing some searching I came across this bug report on the MySQL website: 
+		 Restaure dump created with 5.7.22 on 8.0.11
+
+         What fix worked for me was to go through my dump file manually and remove the 
+		 statements:
+         'NO_AUTO_CREATE_USER' which are located above each of your routine dumps within the 
+		 dump file. Statement to remove image example  [WP]
+	     
+		 campb Database and stored procedures seem to work well H/W: Test later
+	  - CSS styles have disappeared: fix this by modifying config and link classes
+	  * Update links in LINK class file and modify links.
+	     Define HTTP port to empty string '' in config.php file
+	     // Server HTTP port (can omit if the default 80 is used)
+         define('HTTP_SERVER_PORT', '');   [WP]
+      - H/W: Redesign campb mobile responsive styles to be like amazon. Add banner
+	    horizontal scroll display at top of content, 
+		Create vertical scroll display for two products horizontally in mobile version
+		Create department horizontal scroll display after product display in mobile version
+		Hide left side bar and toggle using department button in header
+		KEY>>Header MUST NOT scroll with content in mobile version
+		
+      =>/*** workzone ***/
+	  1) Calendar: http://localhost/workzone/calendar/public/
+	     ERROR: Fatal error: __autoload() is no longer supported, use spl_autoload_register() 
+		 instead in C:\Users\USER\Desktop\klexy\wzroot\workzone\calendar\sys\core\init.inc.php 
+		 on line 41
+		 SOLUTION: H/W: While developing laravelw, find the solution to this issue and test
+		 the link again.
+		 
+	  2) Humanr Web: http://localhost/workzone/humanr/public/
+	     - ERROR: Fatal error: Uncaught PDOException: SQLSTATE[HY000] [1049] Unknown database 
+		 'humanrw' in 
+		 C:\Users\USER\Desktop\klexy\wzroot\workzone\humanr\app\Controllers\DatabaseHandler.php:35 Stack trace: #0
+		 
+         - SOLUTION: 
+	     * Created database in mysql shell using:
+	       > CREATE DATABASE IF NOT EXISTS humanrw;
+	     * Added the following to mysql5 backup file 
+	      --
+          -- MyVersion: Specify database to use to avoid error
+          -- Error 1064 (3D000) at line 22: No database selected
+          --
+          USE humanrw;
+	    * Created the new database from command prompt using the following command [WP]
+	      C:\Users\USER\Desktop\klexy\mysql_dbs_bkup\humanrw>mysql -u root -p<humanrw.sql
+		  Enter password: Sikehjaphetberyuf12      [WP]
+	      Database queries appear to work but css is gone H/W?
+		* Edit config (workzone/humanr/config/config.php) and link factory 
+	    - Update links in LINK class file and modify links.
+	      Define HTTP port to empty string ''
+	      // Server HTTP port (can omit if the default 80 is used)
+          define('HTTP_SERVER_PORT', '');   [WP]
+        - H/W: Redesign and simply css styles. Use display flex for layout and remove float
+          Delete header, main, footer and only maintain <div> with IDs.
+          Use display flex for doc, #header, #content, #footer
+          KEY>> // Double forward slash commenting is working in css
+        - Study and master all link functions and implementations ass you progress
+          with coding of app		
+	   
+	   
+NXT> Install composer, laravel, create klexy/sites and test laravel apps [...Continue]
+
+1)=>/*** humanr - Laravel ***/
+  C:\...\Desktop\klexy\sites\humanr>php artisan serve    [WP] 
+  http://localhost:8000    opens home page with home page index view
+  - Test a humanr link with database connection. Then create and test database 
+    C:\Users\USER\Desktop\klexy\sites\humanr\routes\web.php
+	http://localhost:8000/user
+	ERROR: 
+	SQLSTATE[HY000] [1049] Unknown database 'humanr'
+    SELECT
+    *
+    FROM
+    `users`
+	SOLUTION: 
+	* Create humanr database in mysql and recreate entire database from humanr.sql
+	* Created database in mysql shell using:
+	       > CREATE DATABASE IF NOT EXISTS humanr;
+	     * Added the following to mysql5 backup file 
+	      --
+          -- MyVersion: Specify database to use to avoid error
+          -- Error 1064 (3D000) at line 22: No database selected
+          --
+          USE humanr;
+	    * Created the new database from command prompt using the following command [WP]
+	      C:\Users\USER\Desktop\klexy\mysql_dbs_bkup\humanr>mysql -u root -p<humanr.sql
+		  Enter password: Sikehjaphetberyuf12      [WP]
+		  Users are displayed correctly from database [WP]
+
+  
+=> MySQL 8.0.36 
+
+=> Laravel Downloads and dependencies
+- Composer version 2.3.10  (from TOSHIBA)
+- Composer version 2.7.0   (On Dell) [WP]
+- Laravel 9.34.0
+  Use composer to download specific version of laravel in klexy/sites directory
+KEY>> Laravel is already installed for all laravel projects in sites directory.
+  C:\Users\USER\Desktop\klexy\sites\humanr>php artisan --version
+  Laravel Framework 9.34.0
+  
+  * To install the same version of laravel for future projects, use the command:
+  composer create-project laravel/laravel="9.34.0" appName
+  OR
+  composer create-project laravel/laravel blog "9.34.0"        (where blog is the app name)
+  
